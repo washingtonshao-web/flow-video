@@ -1,7 +1,7 @@
 {
   "name": "flow-video",
   "displayName": "Flow Video",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "One sentence to a finished video with Google Flow (Omni) on your own Google AI subscription: storyboard, ChatGPT keyframes, generation in your signed-in Chrome, automatic QC, 1080p assembly.",
   "author": { "name": "washingtonshao-web" },
   "homepage": "https://github.com/washingtonshao-web/flow-video",

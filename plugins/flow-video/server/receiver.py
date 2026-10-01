@@ -45,14 +45,39 @@ class _H(BaseHTTPRequestHandler):
         pass
 
 
-def ensure_running(port: int = PORT) -> int:
+class _Exclusive(ThreadingHTTPServer):
+    # Windows lets several sockets share a port when SO_REUSEADDR is set; claim it exclusively instead
+    allow_reuse_address = False
+    daemon_threads = True
+
+    def server_bind(self):
+        import socket
+        if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
+
+
+def _try_bind(port: int) -> bool:
     global _server
-    if _server is None:
-        try:
-            _server = ThreadingHTTPServer(("127.0.0.1", port), _H)
-        except OSError:
-            return port          # another server instance already listening
-        threading.Thread(target=_server.serve_forever, daemon=True).start()
+    if _server is not None:
+        return True
+    try:
+        _server = _Exclusive(("127.0.0.1", port), _H)
+    except OSError:
+        return False             # another Claude session's server owns the port
+    threading.Thread(target=_server.serve_forever, daemon=True).start()
+    return True
+
+
+def ensure_running(port: int = PORT) -> int:
+    """Every Claude session starts its own server; one owns the port, the others stand by and take over within
+    a few seconds if that session closes."""
+    if not _try_bind(port):
+        def standby():
+            import time
+            while not _try_bind(port):
+                time.sleep(3)
+        threading.Thread(target=standby, daemon=True).start()
     return port
 
 

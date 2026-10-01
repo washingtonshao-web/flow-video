@@ -37,9 +37,10 @@ let pick;
 if(want==='newest-omni'){{ pick=opts.filter(o=>ver(o.innerText)).sort((a,b)=>{{const x=ver(b.innerText),y=ver(a.innerText);for(let i=0;i<3;i++){{if((x[i]||0)!==(y[i]||0))return (x[i]||0)-(y[i]||0)}}return 0}})[0]; }}
 else pick=opts.find(o=>o.innerText.includes(want));
 if(pick) {{pick.click(); await sleep(500);}}
-for (const t of [{json.dumps(aspect)}, '{duration}s', 'x{count}']) {{ const b=btns().find(b=>b.innerText.replace(/\\s+/g,' ').trim().endsWith(t)); if(b) {{b.click(); await sleep(250);}} }}
+for (const t of [{json.dumps(aspect)}, '{duration}s', 'x{count}']) {{ const b=btns().find(b=>b!==trig&&b.innerText.replace(/\\s+/g,' ').trim().endsWith(t)); if(b) {{b.click(); await sleep(250);}} }}
 const cost=(document.body.innerText.match(/Generating will use (\\d+) credits/)||[])[1];
-document.dispatchEvent(new KeyboardEvent('keydown',{{key:'Escape',bubbles:true}})); trig.click(); await sleep(300);
+document.dispatchEvent(new KeyboardEvent('keydown',{{key:'Escape',bubbles:true}})); await sleep(400);
+if(btns().some(b=>b.innerText.trim()==='Frames')) {{ trig.click(); await sleep(300); }}
 return JSON.stringify({{models:names, picked:pick&&pick.innerText.replace(/volume_up|\\s+/g,' ').trim(), cost_per_run:cost&&+cost, setting:byAria('Settings trigger').innerText.replace(/\\s+/g,' ')}});
 """
     return _wrap(body)
@@ -78,8 +79,11 @@ return JSON.stringify({captured:!!window.__flowFile, next:'find the file input (
 def use_frame(filename: str, slot: str = "Start") -> str:
     """After upload finishes: pick the uploaded image in the picker and add it as the Start (or End) frame."""
     body = f"""
-const dlg=document.querySelector('[role=dialog]');
-if(!dlg){{ const s=byText({json.dumps(slot)}); if(s){{s.click(); await sleep(1200);}} }}
+// newer Flow builds attach the uploaded image straight to the Start slot
+const swap=byAria('Swap first and last frames'); const st=swap&&swap.previousElementSibling;
+if({json.dumps(slot)}==='Start' && st && st.querySelector('img')) return JSON.stringify({{ok:true, attached:'auto'}});
+const isOpen=()=>/Select a frame image/.test(document.body.innerText);
+if(!isOpen()){{ const s=byText({json.dumps(slot)}); if(s){{s.click(); for(let i=0;i<10&&!isOpen();i++) await sleep(400);}} }}
 const item=[...document.querySelectorAll('*')].find(e=>e.children.length===0&&vis(e)&&e.innerText&&e.innerText.trim()==={json.dumps(filename)});
 if(item){{item.click(); await sleep(600);}}
 const add=byText('Add to prompt'); if(!add||add.disabled) return JSON.stringify({{ok:false, reason: item?'still uploading, retry':'file not in picker'}});

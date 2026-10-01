@@ -1,0 +1,17 @@
+{
+  "name": "flow-video",
+  "displayName": "Flow Video",
+  "version": "0.1.0",
+  "description": "One sentence to a finished video with Google Flow (Omni) on your own Google AI subscription: storyboard, ChatGPT keyframes, generation in your signed-in Chrome, automatic QC, 1080p assembly.",
+  "author": { "name": "washingtonshao-web" },
+  "homepage": "https://github.com/washingtonshao-web/flow-video",
+  "repository": "https://github.com/washingtonshao-web/flow-video",
+  "license": "MIT",
+  "keywords": ["video", "google-flow", "omni", "mcp"],
+  "mcpServers": {
+    "flow-video": {
+      "command": "python",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server/server.py"]
+    }
+  }
+}

@@ -9,7 +9,7 @@
       "name": "flow-video",
       "source": "./plugins/flow-video",
       "description": "One sentence to a finished video with Google Flow (Omni) on your own Google AI subscription.",
-      "version": "0.1.2"
+      "version": "0.1.3"
     }
   ]
 }

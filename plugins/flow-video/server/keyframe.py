@@ -17,10 +17,12 @@ def generate(job: Path, shot_id: str, prompt: str, aspect: str = "16:9", ref_ima
         return {"ok": False, "error": "Codex CLI not found"}
     kdir = job / "keyframes"
     kdir.mkdir(exist_ok=True)
-    target = kdir / f"{shot_id}.png"
+    # job-unique name: Flow lists uploads by file name, so "s1.png" from two jobs would be ambiguous in its picker
+    stem = f"{job.name}_{shot_id}"
+    target = kdir / f"{stem}.png"
     n = 2
     while target.exists():                       # never overwrite
-        target = kdir / f"{shot_id}_v{n}.png"
+        target = kdir / f"{stem}_v{n}.png"
         n += 1
     orient = "16:9 landscape" if aspect == "16:9" else "9:16 portrait"
     ask = (f"Use built-in image_gen at the largest size and highest quality available: {prompt} "

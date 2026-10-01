@@ -222,6 +222,8 @@ def handle(msg: dict):
 
 
 def main():
+    # MCP is UTF-8 JSON; Windows would otherwise decode stdin with the ANSI code page and garble Chinese
+    sys.stdin.reconfigure(encoding="utf-8")
     sys.stdout.reconfigure(encoding="utf-8")
     import receiver
     receiver.ensure_running()
